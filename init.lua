@@ -146,7 +146,8 @@ require('packer').startup({
     use({ 'nvim-telescope/telescope-file-browser.nvim', requires = 'nvim-telescope/telescope.nvim' })
     use({ 'nvim-telescope/telescope-packer.nvim', requires = 'nvim-telescope/telescope.nvim' })
     use({ 'nvim-treesitter/nvim-treesitter' })
-    use({ 'williamboman/nvim-lsp-installer' })
+    use({ 'williamboman/mason.nvim' })
+    use({ 'williamboman/mason-lspconfig.nvim' })
     use({ 'neovim/nvim-lspconfig' })
     use({ 'hrsh7th/nvim-cmp' })
     use({ 'hrsh7th/cmp-nvim-lsp', requires = 'hrsh7th/nvim-cmp' })
@@ -328,14 +329,11 @@ end)
 -- LSP
 --
 pcall(function()
-  require('nvim-lsp-installer').setup({ automatic_installation = true })
-  local windows = require('lspconfig.ui.windows')
-  local _default_opts = windows.default_opts
-  windows.default_opts = function(options)
-    local opts = _default_opts(options)
-    opts.border = 'single'
-    return opts
-  end
+  require('mason').setup()
+end)
+
+pcall(function()
+  require('mason-lspconfig').setup({ automatic_installation = true })
 end)
 
 pcall(function()
