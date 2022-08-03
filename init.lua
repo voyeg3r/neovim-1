@@ -52,80 +52,26 @@ map('n', '<c-l>', '<c-w>l')
 
 -- Search
 pcall(function()
-  local wk = require('which-key')
-  local options = { prefix = '<leader>' }
-  local mappings = {
-    s = {
-      name = 'Search',
-      f = { function() require('telescope.builtin').find_files({ previewer = false }) end, 'Search for files' },
-      b = { function() require('telescope.builtin').current_buffer_fuzzy_find() end, 'Search the current' },
-      h = { function() require('telescope.builtin').help_tags() end, 'Search help tags' },
-      t = { function() require('telescope.builtin').tags() end, 'Search tags in current directory' },
-      d = { function() require('telescope.builtin').grep_string() end, 'Searches for the string under your cursor' },
-      p = { function() require('telescope.builtin').live_grep() end, 'Search for a string' },
-      o = { function() require('telescope.builtin').tags({ only_current_buffer = true }) end, 'Search tags in current buffer' },
-    },
-  }
-  wk.register(mappings, options)
-
-  mappings = {
-    name = 'Search',
-    ['<space>'] = { function() require('telescope.builtin').buffers() end, 'Search open buffers' },
-    ['?']       = { function() require('telescope.builtin').oldfiles() end, 'Search previously opened files' },
-  }
-  wk.register(mappings, options)
+  require('telescope')
+  map('n', '<leader>ff', function() require('telescope.builtin').find_files({ previewer = false }) end)
+  map('n', '<leader>fb', function() require('telescope.builtin').current_buffer_fuzzy_find() end)
+  map('n', '<leader>fh', function() require('telescope.builtin').help_tags() end)
+  map('n', '<leader>ft', function() require('telescope.builtin').tags() end)
+  map('n', '<leader>fg', function() require('telescope.builtin').live_grep() end)
 end)
 
 -- Git
 pcall(function()
-  local wk = require('which-key')
-  local options = { prefix = '<leader>' }
-  local mappings = {
-    g = {
-      name = 'Git',
-      b = { function() require('gitsigns').blame_line() end, 'Run git blame on the current line' },
-    }
-  }
-  wk.register(mappings, options)
+  require('gitsigns')
+  map('n', '<leader>gb', function() require('gitsigns').blame_line() end)
 end)
 
 -- Explore
 pcall(function()
-  local wk = require('which-key')
-  local options = { prefix = '<leader>' }
-  local mappings = {
-    e = {
-      name = 'Explorer',
-      f = { '<cmd>Neotree focus<cr>', 'Switch focus to the explorer window' },
-      t = { '<cmd>Neotree toggle<cr>', 'Toggle the explorer window' },
-    }
-  }
-  wk.register(mappings, options)
+  require('neo-tree')
+  map('n', '<leader>ef', '<cmd>Neotree focus<cr>')
+  map('n', '<leader>et', '<cmd>Neotree toggle<cr>')
 end)
-
--- Diagnostic
-map('n', '<leader>e', vim.diagnostic.open_float)
-map('n', '[d', vim.diagnostic.goto_prev)
-map('n', ']d', vim.diagnostic.goto_next)
-map('n', '<leader>q', vim.diagnostic.setloclist)
-
--- LSP/Buffer
-local set_buffer_maps = function(bufnr)
-  local opts = { buffer = bufnr }
-  map('n', 'gD', vim.lsp.buf.declaration, opts)
-  map('n', 'gd', vim.lsp.buf.definition, opts)
-  map('n', 'K', vim.lsp.buf.hover, opts)
-  map('n', 'gi', vim.lsp.buf.implementation, opts)
-  -- map('n', '<C-k>', vim.lsp.buf.signature_help, opts)
-  map('n', '<leader>wa', vim.lsp.buf.add_workspace_folder, opts)
-  map('n', '<leader>wr', vim.lsp.buf.remove_workspace_folder, opts)
-  map('n', '<leader>wl', function() vim.inspect(vim.lsp.buf.list_workspace_folders()) end, opts)
-  map('n', '<leader>D', vim.lsp.buf.type_definition, opts)
-  map('n', '<leader>rn', vim.lsp.buf.rename, opts)
-  map('n', 'gr', vim.lsp.buf.references, opts)
-  map('n', '<leader>ca', vim.lsp.buf.code_action, opts)
-  map('n', '<leader>so', require('telescope.builtin').lsp_document_symbols, opts)
-end
 
 
 --
@@ -139,6 +85,27 @@ require('packer').init({
 })
 require('packer').startup({
   function(use)
+    use {
+      'VonHeikemen/lsp-zero.nvim',
+      requires = {
+        -- LSP Support
+        { 'neovim/nvim-lspconfig' },
+        { 'williamboman/mason.nvim' },
+        { 'williamboman/mason-lspconfig.nvim' },
+
+        -- Autocompletion
+        { 'hrsh7th/nvim-cmp' },
+        { 'hrsh7th/cmp-buffer' },
+        { 'hrsh7th/cmp-path' },
+        { 'saadparwaiz1/cmp_luasnip' },
+        { 'hrsh7th/cmp-nvim-lsp' },
+        { 'hrsh7th/cmp-nvim-lua' },
+
+        -- Snippets
+        { 'L3MON4D3/LuaSnip' },
+        { 'rafamadriz/friendly-snippets' },
+      }
+    }
     use({ 'wbthomason/packer.nvim' })
     use({ 'chriskempson/base16-vim' })
     use({ 'nvim-telescope/telescope.nvim', requires = 'nvim-lua/plenary.nvim' })
@@ -146,20 +113,10 @@ require('packer').startup({
     use({ 'nvim-telescope/telescope-file-browser.nvim', requires = 'nvim-telescope/telescope.nvim' })
     use({ 'nvim-telescope/telescope-packer.nvim', requires = 'nvim-telescope/telescope.nvim' })
     use({ 'nvim-treesitter/nvim-treesitter' })
-    use({ 'williamboman/mason.nvim' })
-    use({ 'williamboman/mason-lspconfig.nvim' })
-    use({ 'neovim/nvim-lspconfig' })
-    use({ 'hrsh7th/nvim-cmp' })
-    use({ 'hrsh7th/cmp-nvim-lsp', requires = 'hrsh7th/nvim-cmp' })
-    use({ 'hrsh7th/cmp-nvim-lua', requires = 'hrsh7th/nvim-cmp' })
-    use({ 'hrsh7th/cmp-buffer', requires = 'hrsh7th/nvim-cmp' })
-    use({ 'hrsh7th/cmp-path', requires = 'hrsh7th/nvim-cmp' })
-    use({ 'saadparwaiz1/cmp_luasnip', requires = 'hrsh7th/nvim-cmp' })
-    use({ 'L3MON4D3/LuaSnip', requires = 'hrsh7th/nvim-cmp' })
-    use({ 'nvim-neo-tree/neo-tree.nvim', branch = 'v2.x', requires = { 'nvim-lua/plenary.nvim', 'kyazdani42/nvim-web-devicons', 'MunifTanjim/nui.nvim' } })
+    use({ 'nvim-neo-tree/neo-tree.nvim', branch = 'v2.x',
+      requires = { 'nvim-lua/plenary.nvim', 'kyazdani42/nvim-web-devicons', 'MunifTanjim/nui.nvim' } })
     use({ 'lewis6991/gitsigns.nvim' })
     use({ 'feline-nvim/feline.nvim', requires = 'kyazdani42/nvim-web-devicons' })
-    use({ 'folke/which-key.nvim' })
   end
 })
 
@@ -196,220 +153,12 @@ end)
 
 
 --
--- Completion
---
-pcall(function()
-  local cmp = require('cmp')
-  local window = require('cmp.utils.window')
-
-  window._info = window.info
-  window.info = function(self)
-    local info = self:_info()
-    info.scrollable = false
-    return info
-  end
-
-  local icons = {
-    Text = '',
-    Method = '',
-    Function = '',
-    Constructor = '',
-    Field = 'ﰠ',
-    Variable = '',
-    Class = 'ﴯ',
-    Interface = '',
-    Module = '',
-    Property = 'ﰠ',
-    Unit = '塞',
-    Value = '',
-    Enum = '',
-    Keyword = '',
-    Snippet = '',
-    Color = '',
-    File = '',
-    Reference = '',
-    Folder = '',
-    EnumMember = '',
-    Constant = '',
-    Struct = 'פּ',
-    Event = '',
-    Operator = '',
-    TypeParameter = '',
-  }
-
-  local function border(hl_name)
-    return {
-      { '┌', hl_name },
-      { '─', hl_name },
-      { '┐', hl_name },
-      { '│', hl_name },
-      { '┘', hl_name },
-      { '─', hl_name },
-      { '└', hl_name },
-      { '│', hl_name }
-    }
-  end
-
-  local options = {
-    window = {
-      completion = {
-        border = border('CmpBorder')
-      },
-      documentation = {
-        border = border('CmpDocBorder')
-      }
-    },
-    snippet = {
-      expand = function(args)
-        require('luasnip').lsp_expand(args.body)
-      end
-    },
-    formatting = {
-      format = function(_, vim_item)
-        vim_item.kind = string.format('%s %s', icons[vim_item.kind], vim_item.kind)
-        return vim_item
-      end
-    },
-    mapping = {
-      ['<c-p>'] = cmp.mapping.select_prev_item(),
-      ['<c-n>'] = cmp.mapping.select_next_item(),
-      ['<c-d>'] = cmp.mapping.scroll_docs(-4),
-      ['<c-f>'] = cmp.mapping.scroll_docs(-4),
-      ['<c-space>'] = cmp.mapping.complete(),
-      ['<c-e>'] = cmp.mapping.close(),
-      ['<cr>'] = cmp.mapping.confirm({ behavior = cmp.ConfirmBehavior.Insert, select = true }),
-      ['<tab>'] = cmp.mapping(function(fallback)
-        if cmp.visible() then
-          cmp.select_next_item()
-        elseif require('luasnip').expand_or_jumpable() then
-          vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<plug>luasnip-expand-or-jump', true, true, true), '')
-        else
-          fallback()
-        end
-      end, { 'i', 's' }),
-      ['<s-tab>'] = cmp.mapping(function(fallback)
-        if cmp.visible() then
-          cmp.select_prev_item()
-        elseif require('luasnip').jumpable(-1) then
-          vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<plug>luasnip-jump-prev', true, true, true), '')
-        else
-          fallback()
-        end
-      end, { 'i', 's' }),
-    },
-    sources = {
-      { name = 'nvim_lsp' },
-      { name = 'luasnip' },
-      { name = 'buffer' },
-      { name = 'nvim_lua' },
-      { name = 'path' }
-    }
-  }
-
-  cmp.setup(options)
-end)
-
-
---
--- Snippets
---
-pcall(function()
-  local luasnip = require('luasnip')
-
-  luasnip.config.set_config({
-    history = true,
-    updateevents = 'TextChanged,TextChangedI'
-  })
-
-  require('luasnip.loaders.from_vscode').lazy_load()
-end)
-
-
---
 -- LSP
 --
 pcall(function()
-  require('mason').setup()
-end)
-
-pcall(function()
-  require('mason-lspconfig').setup({ automatic_installation = true })
-end)
-
-pcall(function()
-  local lspconfig = require('lspconfig')
-
-  local function lspSymbol(name, icon)
-    local highlight = 'DiagnosticSign' .. name
-    vim.fn.sign_define(highlight, { text = icon, numhl = highlight, texthl = highlight })
-  end
-
-  lspSymbol('Error', '')
-  lspSymbol('Info', '')
-  lspSymbol('Hint', '')
-  lspSymbol('Warn', '')
-
-  vim.diagnostic.config {
-    virtual_text = {
-      prefix = '',
-    },
-    signs = true,
-    underline = true,
-    update_in_insert = false,
-  }
-
-  vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = 'single' })
-  vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = 'single' })
-
-  -- suppress error messages from lang servers
-  vim.notify = function(msg, log_level)
-    if msg:match 'exit code' then
-      return
-    end
-    if log_level == vim.log.levels.ERROR then
-      vim.api.nvim_err_writeln(msg)
-    else
-      vim.api.nvim_echo({ { msg } }, true, {})
-    end
-  end
-
-  -- Borders for LspInfo winodw
-  local win = require 'lspconfig.ui.windows'
-  local _default_opts = win.default_opts
-
-  win.default_opts = function(options)
-    local opts = _default_opts(options)
-    opts.border = 'single'
-    return opts
-  end
-
-  local on_attach = function(_, bufnr)
-    set_buffer_maps(bufnr)
-    vim.api.nvim_create_user_command('Format', vim.lsp.buf.formatting, {})
-  end
-
-  local capabilities = vim.lsp.protocol.make_client_capabilities()
-  capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
-
-  lspconfig.clangd.setup({ on_attach = on_attach, capabilities = capabilities })
-  lspconfig.gopls.setup({ on_attach = on_attach, capabilities = capabilities })
-  lspconfig.sumneko_lua.setup({
-    on_attach = on_attach,
-    capabilities = capabilities,
-    settings = {
-      Lua = {
-        diagnostics = {
-          globals = { 'vim' }
-        },
-        workspace = {
-          library = {
-            [vim.fn.expand('$VIMRUNTIME/lua')] = true,
-            [vim.fn.expand('$VIMRUNTIME/lua/vim/lsp')] = true
-          }
-        }
-      }
-    }
-  })
+  local lsp = require('lsp-zero')
+  lsp.preset('recommended')
+  lsp.setup()
 end)
 
 
@@ -760,25 +509,6 @@ pcall(function() vim.cmd('let g:neo_tree_remove_legacy_commands = 1') end)
 
 
 --
--- Keybinding Help
---
-pcall(function()
-  local options = {
-    key_labels = {
-      ['<space>'] = 'SP'
-    },
-    plugins = {
-      spelling = { enabled = true }
-    },
-    window = {
-      border = 'single'
-    }
-  }
-  require('which-key').setup(options)
-end)
-
-
---
 -- Colorscheme
 --
 pcall(function() cmd('source ~/.vimrc_background') end)
@@ -800,7 +530,7 @@ local base_16 = {
   base0C = '#75B5AA', -- 0C Cyan
   base0D = '#6A9FB5', -- 0D Blue
   base0E = '#AA759F', -- 0E Magenta
-  base0F = '#8F5536'  -- 0F
+  base0F = '#8F5536' -- 0F
 }
 
 
@@ -809,47 +539,47 @@ hl(0, 'VertSplit', { default = false, fg = base_16.base0C, bg = base_16.base01 }
 
 -- Telescope
 hl(0, 'TelescopePreviewBorder', { fg = base_16.base0B, bg = base_16.base00 })
-hl(0, 'TelescopePromptBorder',  { fg = base_16.base0A, bg = base_16.base00 })
+hl(0, 'TelescopePromptBorder', { fg = base_16.base0A, bg = base_16.base00 })
 hl(0, 'TelescopeResultsBorder', { fg = base_16.base0C, bg = base_16.base00 })
 
-hl(0, 'TelescopePreviewTitle',  { fg = base_16.base0B, bg = base_16.base00 })
-hl(0, 'TelescopePromptTitle',   { fg = base_16.base0A, bg = base_16.base00 })
-hl(0, 'TelescopeResultsTitle',  { fg = base_16.base0C, bg = base_16.base00 })
+hl(0, 'TelescopePreviewTitle', { fg = base_16.base0B, bg = base_16.base00 })
+hl(0, 'TelescopePromptTitle', { fg = base_16.base0A, bg = base_16.base00 })
+hl(0, 'TelescopeResultsTitle', { fg = base_16.base0C, bg = base_16.base00 })
 
 -- CMP
-hl(0, 'CmpBorder',    { fg = base_16.base0A, bg = base_16.base00 })
+hl(0, 'CmpBorder', { fg = base_16.base0A, bg = base_16.base00 })
 hl(0, 'CmpDocBorder', { fg = base_16.base0A, bg = base_16.base00 })
 
 -- Feline
-hl(0, 'Feline',                  { fg = base_16.base05, bg = base_16.base01 })
-hl(0, 'FelineIcon',              { fg = base_16.base01, bg = base_16.base0D })
-hl(0, 'FelineIconSeparator',     { fg = base_16.base0D, bg = base_16.base03 })
-hl(0, 'FelineFileName',          { fg = base_16.base06, bg = base_16.base03 })
+hl(0, 'Feline', { fg = base_16.base05, bg = base_16.base01 })
+hl(0, 'FelineIcon', { fg = base_16.base01, bg = base_16.base0D })
+hl(0, 'FelineIconSeparator', { fg = base_16.base0D, bg = base_16.base03 })
+hl(0, 'FelineFileName', { fg = base_16.base06, bg = base_16.base03 })
 hl(0, 'FelineFileNameSeparator', { fg = base_16.base03, bg = base_16.base02 })
-hl(0, 'FelineDirName',           { fg = base_16.base05, bg = base_16.base02 })
-hl(0, 'FelineDirNameSeparator',  { fg = base_16.base02, bg = base_16.base01 })
-hl(0, 'FelineGit',               { fg = base_16.base05, bg = base_16.base02 })
-hl(0, 'FelineGitAddIcon',        { fg = base_16.base0B, bg = base_16.base02 })
-hl(0, 'FelineGitBranchIcon',     { fg = base_16.base05, bg = base_16.base02 })
-hl(0, 'FelineGitChangeIcon',     { fg = base_16.base0A, bg = base_16.base02 })
-hl(0, 'FelineGitRemoveIcon',     { fg = base_16.base08, bg = base_16.base02 })
-hl(0, 'FelineLspError',          { fg = base_16.base08, bg = base_16.base01 })
-hl(0, 'FelineLspWarning',        { fg = base_16.base0A, bg = base_16.base01 })
-hl(0, 'FelineLspHints',          { fg = base_16.base0E, bg = base_16.base01 })
-hl(0, 'FelineLspInfo',           { fg = base_16.base0B, bg = base_16.base01 })
-hl(0, 'FelineLspIcon',           { fg = base_16.base0B, bg = base_16.base01 })
-hl(0, 'FelineLspProgress',       { fg = base_16.base0D, bg = base_16.base01 })
-hl(0, 'FelineNormalMode',        { fg = base_16.base08, bg = base_16.base00 })
-hl(0, 'FelineInsertMode',        { fg = base_16.base0E, bg = base_16.base00 })
-hl(0, 'FelineTerminalMode',      { fg = base_16.base0B, bg = base_16.base00 })
-hl(0, 'FelineVisualMode',        { fg = base_16.base0C, bg = base_16.base00 })
-hl(0, 'FelineReplaceMode',       { fg = base_16.base0A, bg = base_16.base00 })
-hl(0, 'FelineConfirmMode',       { fg = base_16.base0C, bg = base_16.base00 })
-hl(0, 'FelineCommandMode',       { fg = base_16.base0E, bg = base_16.base00 })
-hl(0, 'FelineSelectMode',        { fg = base_16.base0D, bg = base_16.base00 })
-hl(0, 'FelineEmptySpace',        { fg = base_16.base01, bg = base_16.base01 })
-hl(0, 'FelineCurrentLine',       { fg = base_16.base00, bg = base_16.base0B })
-hl(0, 'FelinePositionIcon',      { fg = base_16.base00, bg = base_16.base0B })
+hl(0, 'FelineDirName', { fg = base_16.base05, bg = base_16.base02 })
+hl(0, 'FelineDirNameSeparator', { fg = base_16.base02, bg = base_16.base01 })
+hl(0, 'FelineGit', { fg = base_16.base05, bg = base_16.base02 })
+hl(0, 'FelineGitAddIcon', { fg = base_16.base0B, bg = base_16.base02 })
+hl(0, 'FelineGitBranchIcon', { fg = base_16.base05, bg = base_16.base02 })
+hl(0, 'FelineGitChangeIcon', { fg = base_16.base0A, bg = base_16.base02 })
+hl(0, 'FelineGitRemoveIcon', { fg = base_16.base08, bg = base_16.base02 })
+hl(0, 'FelineLspError', { fg = base_16.base08, bg = base_16.base01 })
+hl(0, 'FelineLspWarning', { fg = base_16.base0A, bg = base_16.base01 })
+hl(0, 'FelineLspHints', { fg = base_16.base0E, bg = base_16.base01 })
+hl(0, 'FelineLspInfo', { fg = base_16.base0B, bg = base_16.base01 })
+hl(0, 'FelineLspIcon', { fg = base_16.base0B, bg = base_16.base01 })
+hl(0, 'FelineLspProgress', { fg = base_16.base0D, bg = base_16.base01 })
+hl(0, 'FelineNormalMode', { fg = base_16.base08, bg = base_16.base00 })
+hl(0, 'FelineInsertMode', { fg = base_16.base0E, bg = base_16.base00 })
+hl(0, 'FelineTerminalMode', { fg = base_16.base0B, bg = base_16.base00 })
+hl(0, 'FelineVisualMode', { fg = base_16.base0C, bg = base_16.base00 })
+hl(0, 'FelineReplaceMode', { fg = base_16.base0A, bg = base_16.base00 })
+hl(0, 'FelineConfirmMode', { fg = base_16.base0C, bg = base_16.base00 })
+hl(0, 'FelineCommandMode', { fg = base_16.base0E, bg = base_16.base00 })
+hl(0, 'FelineSelectMode', { fg = base_16.base0D, bg = base_16.base00 })
+hl(0, 'FelineEmptySpace', { fg = base_16.base01, bg = base_16.base01 })
+hl(0, 'FelineCurrentLine', { fg = base_16.base00, bg = base_16.base0B })
+hl(0, 'FelinePositionIcon', { fg = base_16.base00, bg = base_16.base0B })
 hl(0, 'FelinePositionSeparator', { fg = base_16.base0B, bg = base_16.base01 })
 
 -- Gitsigns
